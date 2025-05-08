@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubItem } from "../ui/sidebar"
+import { SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem } from "../ui/sidebar"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@radix-ui/react-collapsible"
 import { ChevronRight, Database } from "lucide-react"
 import { invoke } from "@tauri-apps/api/core";
@@ -40,9 +40,11 @@ export const MenuItem = ({
                     <SidebarMenuSub>
                         {collections.map((coll) => (
                             <SidebarMenuSubItem key={coll}>
-                                <div className="flex flex-row">
-                                    <span>{coll}</span>
-                                </div>
+                                <SidebarMenuSubButton>
+                                    <div className="flex flex-row">
+                                        <span>{coll}</span>
+                                    </div>
+                                </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
                         ))}
                     </SidebarMenuSub>
