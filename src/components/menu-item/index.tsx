@@ -5,7 +5,8 @@ import { ChevronRight, Database } from "lucide-react"
 import { invoke } from "@tauri-apps/api/core";
 
 interface MenuItemProps {
-    item: DatabaseInfo;
+    item: DatabaseInfo
+    onGetCollectionFields: (dbName: string, collName: string) => Promise<void>
 }
 
 interface DatabaseInfo {
@@ -14,7 +15,8 @@ interface DatabaseInfo {
 }
 
 export const MenuItem = ({
-    item
+    item,
+    onGetCollectionFields
 }: MenuItemProps) => {
     const [collections, setCollections] = useState<string[]>([])
 
@@ -40,7 +42,7 @@ export const MenuItem = ({
                     <SidebarMenuSub>
                         {collections.map((coll) => (
                             <SidebarMenuSubItem key={coll}>
-                                <SidebarMenuSubButton>
+                                <SidebarMenuSubButton onClick={() => onGetCollectionFields(item.name, coll)}>
                                     <div className="flex flex-row">
                                         <span>{coll}</span>
                                     </div>
