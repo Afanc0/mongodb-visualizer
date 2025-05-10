@@ -23,11 +23,13 @@ import { toast } from "sonner"
 interface CreateRecordPanelProps {
     fieldList: string[]
     selectedCollection: Collection
+    onFetchRecords: () => Promise<void>
 }
 
 export const CreateRecordPanel = ({
     fieldList,
-    selectedCollection
+    selectedCollection,
+    onFetchRecords
 }: CreateRecordPanelProps) => {
     const [selectedFields, setSelectedFields] = useState<string[]>([])
     const [formValues, setFormValues] = useState<Record<string, string>>({})
@@ -108,8 +110,9 @@ export const CreateRecordPanel = ({
         toast("Entry created", {
             description: "A new record has been successfully added.",
         })
-
+        
         setFormValues({})
+        onFetchRecords()
     }
 
     const handleNewFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {

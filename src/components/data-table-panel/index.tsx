@@ -8,27 +8,14 @@ import { invoke } from "@tauri-apps/api/core"
 
 interface DataTablePanelProps {
     fieldList: string[]
-    selectedCollection: Collection
+    data: never[]
 }
 
 export const DataTablePanel = ({
     fieldList,
-    selectedCollection
+    data
 }: DataTablePanelProps) => {
     const columns = generateColumns(fieldList)
-    const [data, setData] = useState([])
-
-    useEffect(() => {
-        const fetchRecords = async () => {
-            if (fieldList) {
-                setData(JSON.parse(await invoke("find_many", {
-                    db: selectedCollection.db,
-                    coll: selectedCollection.coll
-                })))
-            }
-        }
-        fetchRecords()
-    }, [fieldList])
 
     return (
         <div>
