@@ -1,11 +1,11 @@
 import type React from "react"
 
-import { useState, useRef } from "react"
-import { GripVertical, X, PlusCircle, Send } from "lucide-react"
+import { useState, useRef, useEffect } from "react"
+import { GripVertical, X, PlusCircle } from "lucide-react"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 import { Label } from "../ui/label"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
 import { cn } from "/lib/utils"
 import {
   Dialog,
@@ -16,10 +16,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
 import { invoke } from "@tauri-apps/api/core"
 import { Collection } from "/@/types/databases-info"
-
 
 interface CreateRecordPanelProps {
     fieldList: string[]
@@ -34,8 +32,15 @@ export const CreateRecordPanel = ({
     const [formValues, setFormValues] = useState<Record<string, string>>({})
     const [isSubmitted, setIsSubmitted] = useState(false)
     const dropZoneRef = useRef<HTMLDivElement>(null)
-    const [newField, setNewField] = useState<string>("")
+
+    const [availableFields, setAvailableFields] = useState<string[]>(fieldList)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
+
+    const [newField, setNewField] = useState("")
+
+    useEffect(() => {
+        setAvailableFields(fieldList)
+    }, [fieldList])
 
     const handleDragStart = (e: React.DragEvent, field: string) => {
         e.dataTransfer.setData("fieldId", field)
@@ -62,7 +67,7 @@ export const CreateRecordPanel = ({
         }
 
         const fieldId = e.dataTransfer.getData("fieldId")
-        const field = fieldList.find((f) => f === fieldId)
+        const field = availableFields.find((f) => f === fieldId)
 
         if (field && !selectedFields.some((f) => f === fieldId)) {
             setSelectedFields([...selectedFields, field])
@@ -100,49 +105,20 @@ export const CreateRecordPanel = ({
         })
     }
 
-    // const handleNewFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    //     const { name, value } = e.target
-    //     setNewField(name)
-    // }
+    const handleNewFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setNewField(e.target.value)
+    }
+    
+    const handleCreateField = () => {
+        setAvailableFields([...availableFields, newField])
+        setNewField("")
+        setIsDialogOpen(false)
 
-//   // Handle select changes in the new field form
-//   const handleTypeChange = (value: string) => {
-//     setNewField()
-//   }
-
-//   // Handle creating a new field
-//   const handleCreateField = () => {
-//     if (!newField.label || !newField.name) {
-//       return // Don't create field without required properties
-//     }
-
-//     // Create a unique ID based on the name
-//     const id = newField.name?.toLowerCase().replace(/\s+/g, "-") || `field-${Date.now()}`
-
-//     // Check if ID already exists
-//     if (fieldList.some((field) => field === id)) {
-//       alert("A field with this name already exists. Please use a different name.")
-//       return
-//     }
-
-//     // Add the new field to available fields
-//     const fieldToAdd: FieldDefinition = {
-//       id,
-//       name: newField.name,
-//       label: newField.label,
-//       type: newField.type as "text" | "email" | "number" | "tel" | "date",
-//       placeholder: newField.placeholder,
-//     }
-
-//     setAvailableFields([...availableFields, fieldToAdd])
-
-//     // Reset the form
-//     setNewField({ type: "text" })
-//     setIsDialogOpen(false)
-//   }
+        console.log(availableFields)
+    }
 
   return (
-    <div className="flex flex-row w-full min-h-full">
+    <div className="flex flex-row w-full h-full">
         <Card className="flex-1 rounded-none border-r border-l-0 border-y-0">
             <CardHeader>
                 <CardTitle>Available Fields</CardTitle>
@@ -151,7 +127,44 @@ export const CreateRecordPanel = ({
                 </span>
             </CardHeader>
             <CardContent className="space-y-3 h-full overflow-y-auto pr-2">
-                {fieldList.slice(1).map((field) => (
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogTrigger asChild>
+                        <Button variant="outline" className="w-full mb-4">
+                            <PlusCircle className="h-4 w-4 mr-2" />
+                            Create New Field
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Create New Field</DialogTitle>
+                            <DialogDescription>Define a custom field to add to your form.</DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="fieldName" className="text-right">
+                                    Name
+                                </Label>
+                                <Input
+                                    id="fieldName"
+                                    name="name"
+                                    value={newField || ""}
+                                    onChange={handleNewFieldChange}
+                                    placeholder="e.g. jobTitle"
+                                    className="col-span-3"
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                                Cancel
+                            </Button>
+                            <Button type="button" onClick={handleCreateField}>
+                                Create Field
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+                {availableFields.slice(1).map((field) => (
                     <div
                         key={field}
                         draggable
@@ -209,7 +222,6 @@ export const CreateRecordPanel = ({
                             {selectedFields.length > 0 && (
                                 <Button type="submit" className="mt-4">
                                     Submit Form
-                                    <Send className="w-4 h-4"/>
                                 </Button>
                             )}
                         </form>
