@@ -10,8 +10,11 @@ fn greet(name: &str) -> String {
 }
 
 #[tauri::command]
-async fn find_many() -> Result<String, String> {
-    match db_client::find_many("cats", doc! {}, "animals").await {
+async fn find_many(
+    db: String,
+    coll: String,
+) -> Result<String, String> {
+    match db_client::find_many(&coll, doc! {}, &db).await {
         Ok(docs) => {
             let json_docs = serde_json::to_string(&docs).map_err(|e| e.to_string())?;
             Ok(json_docs)
