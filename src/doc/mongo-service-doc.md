@@ -57,8 +57,6 @@ await invoke("insert_one", {
 **Description:**  
 Finds all documents in the `cats` collection in the `animals` database.
 
-> 💡 Currently hardcoded. You can extend it to accept parameters.
-
 **Parameters:**
 - `db`: Database name
 - `coll`: Collection name
