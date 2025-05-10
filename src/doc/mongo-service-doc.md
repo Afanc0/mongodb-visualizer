@@ -52,16 +52,23 @@ await invoke("insert_one", {
 
 ---
 
-## 📤 `find_many() -> Result<JSON, String>`
+## 📤 `find_many(db, coll) -> Result<JSON, String>`
 
 **Description:**  
 Finds all documents in the `cats` collection in the `animals` database.
 
 > 💡 Currently hardcoded. You can extend it to accept parameters.
 
+**Parameters:**
+- `db`: Database name
+- `coll`: Collection name
+
 **Example:**
 ```ts
-const data = await invoke("find_many");
+const data = await invoke("find_many", {
+    db: "animals",
+    coll: "cats"
+});
 console.log(JSON.parse(data));
 ```
 
