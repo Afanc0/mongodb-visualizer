@@ -18,6 +18,7 @@ import {
 } from "../ui/dialog"
 import { invoke } from "@tauri-apps/api/core"
 import { Collection } from "/@/types/databases-info"
+import { toast } from "sonner"
 
 interface CreateRecordPanelProps {
     fieldList: string[]
@@ -103,6 +104,12 @@ export const CreateRecordPanel = ({
             coll: selectedCollection.coll,
             docJson:  JSON.stringify(formValues)
         })
+
+        toast("Entry created", {
+            description: "A new record has been successfully added.",
+        })
+
+        setFormValues({})
     }
 
     const handleNewFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -113,8 +120,6 @@ export const CreateRecordPanel = ({
         setAvailableFields([...availableFields, newField])
         setNewField("")
         setIsDialogOpen(false)
-
-        console.log(availableFields)
     }
 
   return (

@@ -6,6 +6,7 @@ import { DatabaseInfo } from "./types/databases-info"
 import { ActionPanel } from "./components/action-panel"
 
 import { Collection } from "./types/databases-info"
+import { Toaster } from "./components/ui/sonner"
 
 function Dashboard() {
 
@@ -36,6 +37,7 @@ function Dashboard() {
                     </section>
                 </div>
             </main>
+            <Toaster />
         </>
     )
 }
