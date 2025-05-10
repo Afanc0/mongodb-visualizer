@@ -14,15 +14,19 @@ import {
   TableRow,
 } from "/@/components/ui/table"
 import React from "react"
+import { ToolBarHeader } from "../../tool-bar-header"
+import { Collection } from "/@/types/databases-info"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  selectedCollection: Collection
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  selectedCollection
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({})
 
@@ -36,8 +40,14 @@ export function DataTable<TData, TValue>({
     },
   })
 
+  const selectedData = Object.keys(rowSelection)
+    .map((key) => data[parseInt(key, 10)]);
+
   return (
     <div className="rounded-md">
+      <div className="border-b">
+          <ToolBarHeader data={selectedData} selectedCollection={selectedCollection} />
+      </div>
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

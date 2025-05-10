@@ -33,13 +33,11 @@ export const ActionPanel = ({
 
     return (
         <div className="flex flex-col h-screen">
-            <div className="flex-none border-b">
-                <ToolBarHeader />
-            </div>
             <div className="flex-1 border-b overflow-auto">
                 <DataTablePanel 
                     fieldList={fieldList}
                     data={data}
+                    selectedCollection={selectedCollection}
                 />
             </div>
             <div className="flex-1 overflow-auto">

@@ -1,9 +1,32 @@
 import { Edit, Plus, Trash } from "lucide-react"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
+import { useCallback } from "react"
+import { invoke } from "@tauri-apps/api/core"
+import { Collection } from "/@/types/databases-info"
 
+interface ToolBarHeaderProps {
+    data: any[],
+    selectedCollection: Collection
+}
 
-export const ToolBarHeader = () => {
+export const ToolBarHeader = ({
+    data,
+    selectedCollection
+}: ToolBarHeaderProps) => {
+
+    const onDeleteSelected = useCallback(async () => {
+        const objectIdFilter = data.map(value => value["_id"]["$oid"])
+
+        await invoke("bulk_delete", {
+            db: selectedCollection.db,
+            coll: selectedCollection.coll,
+            docJson: JSON.stringify(objectIdFilter)
+        })
+
+        console.log(objectIdFilter)
+    }, [data])
+
     return (
         <div className="p-3 flex justify-between">
             <div className="flex-1 px-3">
@@ -13,7 +36,7 @@ export const ToolBarHeader = () => {
                 <Button variant="outline" size="icon">
                     <Edit />
                 </Button>
-                <Button variant="outline" size="icon">
+                <Button variant="outline" size="icon" onClick={onDeleteSelected}>
                     <Trash />
                 </Button>
                 <Button variant="outline" size="icon">

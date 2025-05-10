@@ -1,25 +1,24 @@
-
-import { useEffect, useState } from "react"
 import { DataTable } from "./data-table"
 import { Collection } from "/@/types/databases-info"
 
 import { generateColumns } from "/@/utils/generic-column-generator"
-import { invoke } from "@tauri-apps/api/core"
 
 interface DataTablePanelProps {
     fieldList: string[]
-    data: never[]
+    data: any[]
+    selectedCollection: Collection
 }
 
 export const DataTablePanel = ({
     fieldList,
-    data
+    data,
+    selectedCollection
 }: DataTablePanelProps) => {
     const columns = generateColumns(fieldList)
 
     return (
         <div>
-            <DataTable columns={columns} data={data} />
+            <DataTable columns={columns} data={data} selectedCollection={selectedCollection} />
         </div>
     )
 }
