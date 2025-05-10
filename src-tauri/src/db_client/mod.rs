@@ -13,6 +13,8 @@ use futures::stream::StreamExt;
 use mongodb::results::DatabaseSpecification;
 use serde::Serialize;
 
+use mongodb::options::WriteModel;
+
 static CLIENT: Lazy<OnceCell<Client>> = Lazy::new(OnceCell::new);
 
 #[derive(Serialize)] 
@@ -30,7 +32,7 @@ pub async fn init_client() -> Result<()> {
     client_options.server_api = Some(server_api);
     let client = Client::with_options(client_options)?;
 
-    match client.database("admin").run_command(doc! { "ping": 1 }, None).await {
+    match client.database("admin").run_command(doc! { "ping": 1 }).await {
         Ok(_) => {
             println!("MongoDB connected.");
             CLIENT.set(client).unwrap_or_else(|_| panic!("Client already initialized"));
@@ -48,7 +50,7 @@ pub async fn init_client() -> Result<()> {
 pub async fn find_many(coll: &str, filter: Document, db: &str) -> Result<Vec<Document>> {
     let client = CLIENT.get().expect("MongoDB client not initialized");
     let collection = client.database(db).collection::<Document>(coll);
-    let mut cursor = collection.find(filter, None).await?;
+    let mut cursor = collection.find(filter).await?;
     let mut results = Vec::new();
     while let Some(doc) = cursor.next().await {
         results.push(doc?);
@@ -61,7 +63,7 @@ pub async fn insert_one(coll: &str, doc: Document, db: &str) -> Result<ObjectId>
     let client = CLIENT.get().expect("MongoDB client not initialized");
     let collection: Collection<Document> = client.database(db).collection(coll);
 
-    let result = collection.insert_one(doc, None).await?;
+    let result = collection.insert_one(doc).await?;
     let inserted_id = result
         .inserted_id
         .as_object_id()
@@ -78,7 +80,7 @@ pub async fn delete_many(coll: &str, operations: Vec<Document>, db: &str) -> Res
     
     let mut deleted_count = 0;
     for filter in operations {
-        let result = collection.delete_many(filter, None).await?;
+        let result = collection.delete_many(filter).await?;
         deleted_count += result.deleted_count;
     }
 
@@ -86,10 +88,17 @@ pub async fn delete_many(coll: &str, operations: Vec<Document>, db: &str) -> Res
 }
 
 #[allow(dead_code)]
+pub async fn bulk_delete(models: Vec<WriteModel>) -> Result<i64> {
+    let client = CLIENT.get().expect("MongoDB client not initialized"); 
+    let result = client.bulk_write(models).await?;
+    Ok(result.deleted_count)
+}
+
+#[allow(dead_code)]
 pub async fn update_one(coll: &str, filter: Document, update: Document, db: &str) -> Result<u64> {
     let client = CLIENT.get().expect("MongoDB client not initialized");
     let collection = client.database(db).collection::<Document>(coll);
-    let result: UpdateResult = collection.update_one(filter, update, None).await?;
+    let result: UpdateResult = collection.update_one(filter, update).await?;
     Ok(result.modified_count)
 }
 
@@ -97,7 +106,7 @@ pub async fn update_one(coll: &str, filter: Document, update: Document, db: &str
 pub async fn list_databases() -> Result<Vec<DatabaseInfo>> {
     let client = CLIENT.get().expect("MongoDB client not initialized");
     let dbs: Vec<DatabaseSpecification> = client
-        .list_databases(None, None)
+        .list_databases()
         .await?;
     let databases = dbs
         .into_iter()
@@ -116,7 +125,7 @@ pub async fn fetch_collections(db_name: &str) -> Result<Vec<String>> {
     let client = CLIENT.get().expect("MongoDB client not initialized");
     let collections = client
         .database(db_name)
-        .list_collection_names(None)
+        .list_collection_names()
         .await?;
     Ok(collections)
 }
@@ -141,7 +150,7 @@ pub async fn fetch_collection_fields(db_name: &str, coll_name: &str) -> Result<V
         }},
     ];
 
-    let mut cursor = collection.aggregate(pipeline, None).await?;
+    let mut cursor = collection.aggregate(pipeline).await?;
     if let Some(Ok(doc)) = cursor.next().await {
         if let Some(keys) = doc.get_array("allKeys").ok() {
             let key_strings = keys.iter().filter_map(|k| k.as_str().map(String::from)).collect();
@@ -149,4 +158,12 @@ pub async fn fetch_collection_fields(db_name: &str, coll_name: &str) -> Result<V
         }
     }
     Ok(vec![])
+}
+
+#[allow(dead_code)]
+pub fn get_namespace(db_name: &str, coll_name: &str) -> Result<Collection<Document>> {
+    let client = CLIENT.get().expect("MongoDB client not initialized");
+    let namespace = client.database(db_name).collection::<Document>(coll_name);
+
+    Ok(namespace)
 }

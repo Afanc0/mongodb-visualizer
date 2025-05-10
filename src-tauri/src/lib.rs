@@ -2,6 +2,13 @@
 use mongodb::bson::doc;
 use mongodb::bson::Document;
 
+use mongodb::options::WriteModel;
+use mongodb::options::DeleteOneModel;
+
+use mongodb::bson::oid::ObjectId;
+
+use serde_json::Value;
+
 mod db_client;
 
 #[tauri::command]
@@ -53,6 +60,45 @@ async fn delete_many(
 }
 
 #[tauri::command]
+async fn bulk_delete(
+    db: String,
+    coll: String,
+    doc_json: String
+) {
+    let ns = db_client::get_namespace(&db, &coll);
+    let docs: Result<Vec<Value>, _> = serde_json::from_str(&doc_json);
+
+    let mut models: Vec<WriteModel> = Vec::new();
+
+    for doc in docs {
+        for d in doc {
+            if let Some(str_val) = d.as_str() {
+                println!("Parsed document: {}", str_val);
+                models.push(
+                    WriteModel::DeleteOne(
+                        DeleteOneModel::builder()
+                            .namespace(ns.clone().expect("REASON").namespace())
+                            .filter(doc! {"_id": ObjectId::parse_str(str_val).unwrap()})
+                            .build()
+                    )
+                );
+            }
+        }
+    }
+
+    db_client::bulk_delete(models).await
+        .map_err(|e| e.to_string())
+        .map(|result| {
+            println!("Bulk delete result: {:?}", result);
+        })
+        .unwrap_or_else(|e| {
+            println!("Bulk delete error: {}", e);
+        });
+
+    println!("Done");
+}
+
+#[tauri::command]
 async fn list_databases() -> Result<Vec<db_client::DatabaseInfo>, String> {
     db_client::list_databases()
         .await
@@ -96,7 +142,8 @@ pub fn run() {
             delete_many,
             list_databases,
             get_collections,
-            get_collection_fields
+            get_collection_fields,
+            bulk_delete
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
