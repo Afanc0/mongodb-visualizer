@@ -1,0 +1,222 @@
+import type React from "react"
+
+import { useState, useRef } from "react"
+import { GripVertical, X, PlusCircle, Send } from "lucide-react"
+import { Button } from "../ui/button"
+import { Input } from "../ui/input"
+import { Label } from "../ui/label"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card"
+import { cn } from "/lib/utils"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
+import { invoke } from "@tauri-apps/api/core"
+import { Collection } from "/@/types/databases-info"
+
+
+interface CreateRecordPanelProps {
+    fieldList: string[]
+    selectedCollection: Collection
+}
+
+export const CreateRecordPanel = ({
+    fieldList,
+    selectedCollection
+}: CreateRecordPanelProps) => {
+    const [selectedFields, setSelectedFields] = useState<string[]>([])
+    const [formValues, setFormValues] = useState<Record<string, string>>({})
+    const [isSubmitted, setIsSubmitted] = useState(false)
+    const dropZoneRef = useRef<HTMLDivElement>(null)
+    const [newField, setNewField] = useState<string>("")
+    const [isDialogOpen, setIsDialogOpen] = useState(false)
+
+    const handleDragStart = (e: React.DragEvent, field: string) => {
+        e.dataTransfer.setData("fieldId", field)
+    }
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault()
+        if (dropZoneRef.current) {
+            dropZoneRef.current.classList.add("bg-gray-100")
+        }
+    }
+
+    const handleDragLeave = () => {
+        if (dropZoneRef.current) {
+            dropZoneRef.current.classList.remove("bg-gray-100")
+        }
+    }
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault()
+
+        if (dropZoneRef.current) {
+            dropZoneRef.current.classList.remove("bg-gray-100")  
+        }
+
+        const fieldId = e.dataTransfer.getData("fieldId")
+        const field = fieldList.find((f) => f === fieldId)
+
+        if (field && !selectedFields.some((f) => f === fieldId)) {
+            setSelectedFields([...selectedFields, field])
+        }
+    }
+
+    const handleRemoveField = (fieldId: string) => {
+        setSelectedFields(selectedFields.filter((field) => field !== fieldId))
+        const newFormValues = { ...formValues }
+        delete newFormValues[fieldId]
+        setFormValues(newFormValues)
+    }
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target
+        setFormValues({
+            ...formValues,
+            [name]: value,
+        })
+
+        if (isSubmitted) {
+            setIsSubmitted(false)
+        }
+    }
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        console.log("Form submitted with data:", formValues)
+        setIsSubmitted(true)
+        
+        await invoke("insert_one", {
+            db: selectedCollection.db,
+            coll: selectedCollection.coll,
+            docJson:  JSON.stringify(formValues)
+        })
+    }
+
+    // const handleNewFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     const { name, value } = e.target
+    //     setNewField(name)
+    // }
+
+//   // Handle select changes in the new field form
+//   const handleTypeChange = (value: string) => {
+//     setNewField()
+//   }
+
+//   // Handle creating a new field
+//   const handleCreateField = () => {
+//     if (!newField.label || !newField.name) {
+//       return // Don't create field without required properties
+//     }
+
+//     // Create a unique ID based on the name
+//     const id = newField.name?.toLowerCase().replace(/\s+/g, "-") || `field-${Date.now()}`
+
+//     // Check if ID already exists
+//     if (fieldList.some((field) => field === id)) {
+//       alert("A field with this name already exists. Please use a different name.")
+//       return
+//     }
+
+//     // Add the new field to available fields
+//     const fieldToAdd: FieldDefinition = {
+//       id,
+//       name: newField.name,
+//       label: newField.label,
+//       type: newField.type as "text" | "email" | "number" | "tel" | "date",
+//       placeholder: newField.placeholder,
+//     }
+
+//     setAvailableFields([...availableFields, fieldToAdd])
+
+//     // Reset the form
+//     setNewField({ type: "text" })
+//     setIsDialogOpen(false)
+//   }
+
+  return (
+    <div className="flex flex-row w-full min-h-full">
+        <Card className="flex-1 rounded-none border-r border-l-0 border-y-0">
+            <CardHeader>
+                <CardTitle>Available Fields</CardTitle>
+                <span className="text-sm text-muted-foreground mb-4">
+                    Drag fields to the form area on the right to add them to your form.
+                </span>
+            </CardHeader>
+            <CardContent className="space-y-3 h-full overflow-y-auto pr-2">
+                {fieldList.slice(1).map((field) => (
+                    <div
+                        key={field}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, field)}
+                        className={cn(
+                        "flex items-center p-3 border rounded-md cursor-move hover:bg-gray-50 transition-colors",
+                        selectedFields.some((f) => f === field) ? "opacity-50" : "",
+                        )}
+                    >
+                        <GripVertical className="h-5 w-5 mr-2 text-gray-400" />
+                        <span>{field}</span>
+                    </div>
+                ))}
+            </CardContent>
+        </Card>
+        <Card className="flex-1 rounded-none border-none">
+            <CardContent className="overflow-y-auto h-full">
+                <div
+                    ref={dropZoneRef}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    className={cn(
+                        "h-full overflow-y-auto border-2 border-dashed rounded-md p-4 transition-colors",
+                        selectedFields.length === 0 ? "flex items-center justify-center" : "",
+                    )}
+                >
+                    {selectedFields.length === 0 ? (
+                        <span className="text-center text-muted-foreground">Drag fields here to add them to your form</span>
+                    ) : (
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            {selectedFields.map((field) => (
+                            <div key={field} className="relative border rounded-md p-4 pr-10">
+                                <button
+                                    type="button"
+                                    onClick={() => handleRemoveField(field)}
+                                    className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+                                    aria-label={`Remove ${field} field`}
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
+                                <div className="space-y-2">
+                                    <Label htmlFor={field}>{field}</Label>
+                                    <Input
+                                        id={field}
+                                        name={field}
+                                        type="text"
+                                        placeholder={field}
+                                        value={formValues[field] || ""}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                            </div>
+                            ))}
+                            {selectedFields.length > 0 && (
+                                <Button type="submit" className="mt-4">
+                                    Submit Form
+                                    <Send className="w-4 h-4"/>
+                                </Button>
+                            )}
+                        </form>
+                    )}
+                </div>
+            </CardContent>
+        </Card>
+    </div>
+    )
+}
