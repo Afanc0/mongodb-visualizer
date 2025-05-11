@@ -4,27 +4,34 @@ import { Input } from "../ui/input"
 import { useCallback } from "react"
 import { invoke } from "@tauri-apps/api/core"
 import { Collection } from "/@/types/databases-info"
+import { toast } from "sonner"
 
 interface ToolBarHeaderProps {
     data: any[],
     selectedCollection: Collection
+    onFetchRecords: () => Promise<void>
+    onClearRowSelection: () => void
 }
 
 export const ToolBarHeader = ({
     data,
-    selectedCollection
+    selectedCollection,
+    onFetchRecords,
+    onClearRowSelection
 }: ToolBarHeaderProps) => {
-
     const onDeleteSelected = useCallback(async () => {
         const objectIdFilter = data.map(value => value["_id"]["$oid"])
-
         await invoke("bulk_delete", {
             db: selectedCollection.db,
             coll: selectedCollection.coll,
             docJson: JSON.stringify(objectIdFilter)
         })
-
-        console.log(objectIdFilter)
+        
+        await onFetchRecords()
+        onClearRowSelection()
+        toast("Records deleted", {
+            description: "The selected records have been successfully removed.",
+        })
     }, [data])
 
     return (

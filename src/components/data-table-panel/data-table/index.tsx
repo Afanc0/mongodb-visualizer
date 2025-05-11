@@ -21,12 +21,14 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   selectedCollection: Collection
+  onFetchRecords: () => Promise<void>
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  selectedCollection
+  selectedCollection,
+  onFetchRecords
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({})
 
@@ -40,13 +42,22 @@ export function DataTable<TData, TValue>({
     },
   })
 
+  const clearRowSelection = () => {
+    setRowSelection({})
+  }
+
   const selectedData = Object.keys(rowSelection)
     .map((key) => data[parseInt(key, 10)]);
 
   return (
     <div className="rounded-md">
       <div className="border-b">
-          <ToolBarHeader data={selectedData} selectedCollection={selectedCollection} />
+          <ToolBarHeader 
+            data={selectedData} 
+            selectedCollection={selectedCollection}
+            onFetchRecords={onFetchRecords}
+            onClearRowSelection={clearRowSelection}
+          />
       </div>
       <Table>
         <TableHeader>

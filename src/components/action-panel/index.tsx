@@ -38,6 +38,7 @@ export const ActionPanel = ({
                     fieldList={fieldList}
                     data={data}
                     selectedCollection={selectedCollection}
+                    onFetchRecords={fetchRecords}
                 />
             </div>
             <div className="flex-1 overflow-auto">
