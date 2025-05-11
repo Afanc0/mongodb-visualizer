@@ -1,15 +1,16 @@
 import { Edit, Plus, Trash } from "lucide-react"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
 import { invoke } from "@tauri-apps/api/core"
 import { Collection } from "/@/types/databases-info"
 import { toast } from "sonner"
+import { stringToJson } from "/@/utils/string-to-json"
 
 interface ToolBarHeaderProps {
     data: any[],
     selectedCollection: Collection
-    onFetchRecords: () => Promise<void>
+    onFetchRecords: (arg: any) => Promise<void>
     onClearRowSelection: () => void
 }
 
@@ -19,6 +20,9 @@ export const ToolBarHeader = ({
     onFetchRecords,
     onClearRowSelection
 }: ToolBarHeaderProps) => {
+
+    const [filter, setFilter] = useState({})
+
     const onDeleteSelected = useCallback(async () => {
         const objectIdFilter = data.map(value => value["_id"]["$oid"])
         await invoke("bulk_delete", {
@@ -27,17 +31,25 @@ export const ToolBarHeader = ({
             docJson: JSON.stringify(objectIdFilter)
         })
         
-        await onFetchRecords()
+        await onFetchRecords({})
         onClearRowSelection()
         toast("Records deleted", {
             description: "The selected records have been successfully removed.",
         })
     }, [data])
 
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        const jsonFilter = stringToJson(filter as string)
+        await onFetchRecords(jsonFilter)
+    }
+
     return (
         <div className="p-3 flex justify-between">
             <div className="flex-1 px-3">
-                <Input type="text" placeholder="e.g., name='Car'; model='Toyota'" />
+                <form onSubmit={handleSubmit}>
+                    <Input type="text" placeholder="e.g., name='Car'; model='Toyota'"  onChange={e => setFilter(e.target.value)}/>
+                </form>
             </div>
             <div className="flex gap-3 flex-1 justify-end">
                 <Button variant="outline" size="icon">

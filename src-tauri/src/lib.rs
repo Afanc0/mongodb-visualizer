@@ -20,8 +20,12 @@ fn greet(name: &str) -> String {
 async fn find_many(
     db: String,
     coll: String,
+    doc_json: String
 ) -> Result<String, String> {
-    match db_client::find_many(&coll, doc! {}, &db).await {
+    let doc: Document = serde_json::from_str(&doc_json)
+        .map_err(|e| format!("Failed to parse JSON document: {}", e))?;
+
+    match db_client::find_many(&coll, doc, &db).await {
         Ok(docs) => {
             let json_docs = serde_json::to_string(&docs).map_err(|e| e.to_string())?;
             Ok(json_docs)
@@ -73,7 +77,6 @@ async fn bulk_delete(
     for doc in docs {
         for d in doc {
             if let Some(str_val) = d.as_str() {
-                println!("Parsed document: {}", str_val);
                 models.push(
                     WriteModel::DeleteOne(
                         DeleteOneModel::builder()
@@ -94,8 +97,6 @@ async fn bulk_delete(
         .unwrap_or_else(|e| {
             println!("Bulk delete error: {}", e);
         });
-
-    println!("Done");
 }
 
 #[tauri::command]

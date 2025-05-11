@@ -98,7 +98,6 @@ export const CreateRecordPanel = ({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        console.log("Form submitted with data:", formValues)
         setIsSubmitted(true)
         
         await invoke("insert_one", {

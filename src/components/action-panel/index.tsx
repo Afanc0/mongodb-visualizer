@@ -18,10 +18,11 @@ export const ActionPanel = ({
 
     const [data, setData] = useState([])
 
-    const fetchRecords = async () => {
+    const fetchRecords = async (doc = {}) => {
         setData(JSON.parse(await invoke("find_many", {
             db: selectedCollection.db,
-            coll: selectedCollection.coll
+            coll: selectedCollection.coll,
+            docJson: JSON.stringify(doc)
         })))
     }
 

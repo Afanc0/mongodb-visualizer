@@ -7,7 +7,7 @@ interface DataTablePanelProps {
     fieldList: string[]
     data: any[]
     selectedCollection: Collection
-    onFetchRecords: () => Promise<void>
+    onFetchRecords: (arg: any) => Promise<void>
 }
 
 export const DataTablePanel = ({

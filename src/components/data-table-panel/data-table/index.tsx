@@ -21,7 +21,7 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   selectedCollection: Collection
-  onFetchRecords: () => Promise<void>
+  onFetchRecords: (arg: any) => Promise<void>
 }
 
 export function DataTable<TData, TValue>({
