@@ -7,17 +7,18 @@ interface DataTablePanelProps {
     fieldList: string[]
     data: any[]
     selectedCollection: Collection
-    onFetchRecords: (arg: any) => Promise<void>
+    onFetchRecords: (dbName: string, doc: Object, collName: string) => Promise<void>
+    onGetCollectionFields: (dbName: string, collName: string) => Promise<void>
 }
 
 export const DataTablePanel = ({
     fieldList,
     data,
     selectedCollection,
-    onFetchRecords
+    onFetchRecords,
+    onGetCollectionFields
 }: DataTablePanelProps) => {
     const columns = generateColumns(fieldList)
-
     return (
         <div>
             <DataTable 
@@ -25,6 +26,7 @@ export const DataTablePanel = ({
                 data={data} 
                 selectedCollection={selectedCollection}
                 onFetchRecords={onFetchRecords}
+                onGetCollectionFields={onGetCollectionFields}
             />
         </div>
     )

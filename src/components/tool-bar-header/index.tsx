@@ -10,7 +10,8 @@ import { stringToJson } from "/@/utils/string-to-json"
 interface ToolBarHeaderProps {
     data: any[],
     selectedCollection: Collection
-    onFetchRecords: (arg: any) => Promise<void>
+    onFetchRecords: (dbName: string, doc: Object, collName: string) => Promise<void>
+    onGetCollectionFields: (dbName: string, collName: string) => Promise<void>
     onClearRowSelection: () => void
 }
 
@@ -18,7 +19,8 @@ export const ToolBarHeader = ({
     data,
     selectedCollection,
     onFetchRecords,
-    onClearRowSelection
+    onClearRowSelection,
+    onGetCollectionFields
 }: ToolBarHeaderProps) => {
 
     const [filter, setFilter] = useState({})
@@ -31,23 +33,24 @@ export const ToolBarHeader = ({
             docJson: JSON.stringify(objectIdFilter)
         })
         
-        await onFetchRecords({})
+        await onFetchRecords(selectedCollection.db, {}, selectedCollection.coll)
+        await onGetCollectionFields(selectedCollection.db, selectedCollection.coll)
         onClearRowSelection()
         toast("Records deleted", {
             description: "The selected records have been successfully removed.",
         })
     }, [data])
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleFilter = async (e: React.FormEvent) => {
         e.preventDefault()
         const jsonFilter = stringToJson(filter as string)
-        await onFetchRecords(jsonFilter)
+        await onFetchRecords(selectedCollection.db, jsonFilter, selectedCollection.coll)
     }
 
     return (
         <div className="p-3 flex justify-between">
             <div className="flex-1 px-3">
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleFilter}>
                     <Input type="text" placeholder="e.g., name='Car'; model='Toyota'"  onChange={e => setFilter(e.target.value)}/>
                 </form>
             </div>

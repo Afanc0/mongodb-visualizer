@@ -15,11 +15,15 @@ import { DatabaseInfo } from "/@/types/databases-info"
 interface DatabaseExplorerProps {
     itemList: DatabaseInfo[]
     onGetCollectionFields: (dbName: string, collName: string) => Promise<void>
+    onHandleSelectedCollection: (dbName: string, collName: string) => void
+    onFetchRecords: (dbName: string, doc: Object, collName: string) => Promise<void>
 }
 
 export const DatabaseExplorer = ({
     itemList,
-    onGetCollectionFields
+    onGetCollectionFields,
+    onFetchRecords,
+    onHandleSelectedCollection
 }: DatabaseExplorerProps) => {
     return (
         <SidebarProvider>
@@ -30,7 +34,13 @@ export const DatabaseExplorer = ({
                         <SidebarGroupContent>
                             <SidebarMenu>
                                 {itemList.map((item) => (
-                                    <MenuItem key={item.name} item={item} onGetCollectionFields={onGetCollectionFields} />
+                                    <MenuItem 
+                                        key={item.name} 
+                                        item={item} 
+                                        onGetCollectionFields={onGetCollectionFields}
+                                        onHandleSelectedCollection={onHandleSelectedCollection}
+                                        onFetchRecords={onFetchRecords}
+                                    />
                                 ))}
                             </SidebarMenu>
                         </SidebarGroupContent>

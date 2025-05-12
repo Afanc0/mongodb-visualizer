@@ -1,45 +1,32 @@
-import { ToolBarHeader } from "../tool-bar-header"
 import { DataTablePanel } from "../data-table-panel"
 import { CreateRecordPanel } from "../create-record-panel"
 
 import { Collection } from "/@/types/databases-info"
-import { invoke } from "@tauri-apps/api/core"
-import { useEffect, useState } from "react"
 
 interface ActionPanelProps {
     fieldList: string[]
+    records: any[]
     selectedCollection: Collection
+    onFetchRecords: (dbName: string, doc: Object, collName: string) => Promise<void>
+    onGetCollectionFields: (dbName: string, collName: string) => Promise<void>
 }
 
 export const ActionPanel = ({
     fieldList,
-    selectedCollection
+    records,
+    onFetchRecords: fetchRecords,
+    selectedCollection,
+    onGetCollectionFields
 }: ActionPanelProps) => {
-
-    const [data, setData] = useState([])
-
-    const fetchRecords = async (doc = {}) => {
-        setData(JSON.parse(await invoke("find_many", {
-            db: selectedCollection.db,
-            coll: selectedCollection.coll,
-            docJson: JSON.stringify(doc)
-        })))
-    }
-
-    useEffect(() => {
-        if (fieldList) {
-            fetchRecords()
-        }
-    }, [fieldList])
-
     return (
         <div className="flex flex-col h-screen">
             <div className="flex-1 border-b overflow-auto">
                 <DataTablePanel 
                     fieldList={fieldList}
-                    data={data}
+                    data={records}
                     selectedCollection={selectedCollection}
                     onFetchRecords={fetchRecords}
+                    onGetCollectionFields={onGetCollectionFields}
                 />
             </div>
             <div className="flex-1 overflow-auto">
@@ -47,6 +34,7 @@ export const ActionPanel = ({
                     fieldList={fieldList}
                     selectedCollection={selectedCollection}
                     onFetchRecords={fetchRecords}
+                    onGetCollectionFields={onGetCollectionFields}
                 />
             </div>
         </div>

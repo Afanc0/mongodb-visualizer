@@ -3,24 +3,32 @@ import { SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButto
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@radix-ui/react-collapsible"
 import { ChevronRight, Database } from "lucide-react"
 import { invoke } from "@tauri-apps/api/core";
+import { DatabaseInfo } from "/@/types/databases-info"
 
 interface MenuItemProps {
     item: DatabaseInfo
     onGetCollectionFields: (dbName: string, collName: string) => Promise<void>
-}
-
-interface DatabaseInfo {
-    name: string
-    size_on_disk: number
+    onHandleSelectedCollection: (dbName: string, collName: string) => void
+    onFetchRecords: (dbName: string, doc: Object, collName: string) => Promise<void>
 }
 
 export const MenuItem = ({
     item,
-    onGetCollectionFields
+    onGetCollectionFields,
+    onHandleSelectedCollection,
+    onFetchRecords
 }: MenuItemProps) => {
     const [collections, setCollections] = useState<string[]>([])
 
-    const getMongoCollections = async (dbName: string) => setCollections(await invoke("get_collections", { dbName }))
+    const getMongoCollections = async (dbName: string) => {
+        setCollections(await invoke("get_collections", { dbName }))
+    }
+
+    const handleLoadCollection = async (dbName: string, collName: string) => {
+        await onGetCollectionFields(dbName, collName)
+        await onFetchRecords(dbName, {}, collName)
+        onHandleSelectedCollection(dbName, collName)
+    }
 
     return (
         <Collapsible className="group/collapsible">
@@ -42,7 +50,7 @@ export const MenuItem = ({
                     <SidebarMenuSub>
                         {collections.map((coll) => (
                             <SidebarMenuSubItem key={coll}>
-                                <SidebarMenuSubButton onClick={() => onGetCollectionFields(item.name, coll)}>
+                                <SidebarMenuSubButton onClick={() => handleLoadCollection(item.name, coll)}>
                                     <div className="flex flex-row">
                                         <span>{coll}</span>
                                     </div>

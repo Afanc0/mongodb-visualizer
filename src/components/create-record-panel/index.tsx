@@ -23,13 +23,15 @@ import { toast } from "sonner"
 interface CreateRecordPanelProps {
     fieldList: string[]
     selectedCollection: Collection
-    onFetchRecords: () => Promise<void>
+    onFetchRecords: (dbName: string, doc: Object, collName: string) => Promise<void>
+    onGetCollectionFields: (dbName: string, collName: string) => Promise<void>
 }
 
 export const CreateRecordPanel = ({
     fieldList,
     selectedCollection,
-    onFetchRecords
+    onFetchRecords,
+    onGetCollectionFields
 }: CreateRecordPanelProps) => {
     const [selectedFields, setSelectedFields] = useState<string[]>([])
     const [formValues, setFormValues] = useState<Record<string, string>>({})
@@ -111,7 +113,8 @@ export const CreateRecordPanel = ({
         })
         
         setFormValues({})
-        onFetchRecords()
+        await onFetchRecords(selectedCollection.db, {}, selectedCollection.coll)
+        await onGetCollectionFields(selectedCollection.db, selectedCollection.coll)
     }
 
     const handleNewFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
