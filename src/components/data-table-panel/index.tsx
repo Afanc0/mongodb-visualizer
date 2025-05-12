@@ -3,9 +3,11 @@ import { Collection } from "/@/types/databases-info"
 
 import { generateColumns } from "/@/utils/generic-column-generator"
 
+import { Record } from "/@/types/record"
+
 interface DataTablePanelProps {
     fieldList: string[]
-    data: any[]
+    records: Record[]
     selectedCollection: Collection
     onFetchRecords: (dbName: string, doc: Object, collName: string) => Promise<void>
     onGetCollectionFields: (dbName: string, collName: string) => Promise<void>
@@ -13,7 +15,7 @@ interface DataTablePanelProps {
 
 export const DataTablePanel = ({
     fieldList,
-    data,
+    records,
     selectedCollection,
     onFetchRecords,
     onGetCollectionFields
@@ -23,7 +25,7 @@ export const DataTablePanel = ({
         <div>
             <DataTable 
                 columns={columns} 
-                data={data} 
+                data={records} 
                 selectedCollection={selectedCollection}
                 onFetchRecords={onFetchRecords}
                 onGetCollectionFields={onGetCollectionFields}

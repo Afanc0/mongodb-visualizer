@@ -1,0 +1,1 @@
+export type Record = { [key: string]: any }

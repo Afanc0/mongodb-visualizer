@@ -1,4 +1,4 @@
-import { Edit, Plus, Trash } from "lucide-react"
+import { Trash } from "lucide-react"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 import { useCallback, useState } from "react"
@@ -6,6 +6,7 @@ import { invoke } from "@tauri-apps/api/core"
 import { Collection } from "/@/types/databases-info"
 import { toast } from "sonner"
 import { stringToJson } from "/@/utils/string-to-json"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog"
 
 interface ToolBarHeaderProps {
     data: any[],
@@ -22,7 +23,6 @@ export const ToolBarHeader = ({
     onClearRowSelection,
     onGetCollectionFields
 }: ToolBarHeaderProps) => {
-
     const [filter, setFilter] = useState({})
 
     const onDeleteSelected = useCallback(async () => {
@@ -55,15 +55,25 @@ export const ToolBarHeader = ({
                 </form>
             </div>
             <div className="flex gap-3 flex-1 justify-end">
-                <Button variant="outline" size="icon">
-                    <Edit />
-                </Button>
-                <Button variant="outline" size="icon" onClick={onDeleteSelected}>
-                    <Trash />
-                </Button>
-                <Button variant="outline" size="icon">
-                    <Plus />
-                </Button>
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button variant="outline" size="icon">
+                            <Trash />
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This can't be undone. This will permanently delete your record(s).
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={onDeleteSelected}>Delete</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </div>
         </div>
     )

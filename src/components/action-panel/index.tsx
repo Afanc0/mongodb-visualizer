@@ -3,9 +3,11 @@ import { CreateRecordPanel } from "../create-record-panel"
 
 import { Collection } from "/@/types/databases-info"
 
+import { Record } from "/@/types/record"
+
 interface ActionPanelProps {
     fieldList: string[]
-    records: any[]
+    records: Record[]
     selectedCollection: Collection
     onFetchRecords: (dbName: string, doc: Object, collName: string) => Promise<void>
     onGetCollectionFields: (dbName: string, collName: string) => Promise<void>
@@ -23,7 +25,7 @@ export const ActionPanel = ({
             <div className="flex-1 border-b overflow-auto">
                 <DataTablePanel 
                     fieldList={fieldList}
-                    data={records}
+                    records={records}
                     selectedCollection={selectedCollection}
                     onFetchRecords={fetchRecords}
                     onGetCollectionFields={onGetCollectionFields}

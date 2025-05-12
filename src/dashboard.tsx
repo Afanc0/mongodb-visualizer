@@ -8,10 +8,12 @@ import { ActionPanel } from "./components/action-panel"
 import { Collection } from "./types/databases-info"
 import { Toaster } from "./components/ui/sonner"
 
+import { Record } from "./types/record"
+
 function Dashboard() {
     const [databases, setDatabases] = useState<DatabaseInfo[]>([])
     const [fields, setFields] = useState<string[]>([])
-    const [records, setRecords] = useState<any[]>([])
+    const [records, setRecords] = useState<Record[]>([])
 
     const [selectedCollection, setSelectedCollection] = useState<Collection>({ db: "", coll: "" })
 
