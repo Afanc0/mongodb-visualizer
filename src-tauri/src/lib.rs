@@ -9,6 +9,8 @@ use mongodb::bson::oid::ObjectId;
 
 use serde_json::Value;
 
+use mongodb::results::UpdateResult;
+
 mod db_client;
 
 #[tauri::command]
@@ -47,6 +49,30 @@ async fn insert_one(
         .await
         .map(|id| id.to_hex())
         .map_err(|e| e.to_string())
+}
+
+
+#[tauri::command]
+async fn update_one(
+    coll: String,
+    filter: String,
+    update: String,
+    db: String,
+) -> Result<u64, String> {
+    let filter_doc: Document = serde_json::from_str(&filter)
+        .map_err(|e| format!("Failed to parse filter JSON: {}", e))?;
+
+    let _id_str = filter_doc.get("_id").unwrap().as_str().unwrap();
+    let object_id = ObjectId::parse_str(_id_str).map_err(|e| e.to_string())?;
+
+    let update_doc: Document = serde_json::from_str(&update)
+        .map_err(|e| format!("Failed to parse update JSON: {}", e))?;
+
+    let result: u64 = db_client::update_one(&coll, doc! { "_id": object_id }, update_doc, &db)
+        .await
+        .map_err(|e| format!("MongoDB update error: {}", e))?;
+
+    Ok(result)
 }
 
 #[tauri::command]
@@ -144,7 +170,8 @@ pub fn run() {
             list_databases,
             get_collections,
             get_collection_fields,
-            bulk_delete
+            bulk_delete,
+            update_one
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
