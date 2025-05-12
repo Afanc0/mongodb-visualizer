@@ -21,14 +21,16 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   selectedCollection: Collection
-  onFetchRecords: (arg: any) => Promise<void>
+  onFetchRecords: (dbName: string, doc: Object, collName: string) => Promise<void>
+  onGetCollectionFields: (dbName: string, collName: string) => Promise<void>
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   selectedCollection,
-  onFetchRecords
+  onFetchRecords,
+  onGetCollectionFields
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({})
 
@@ -42,9 +44,7 @@ export function DataTable<TData, TValue>({
     },
   })
 
-  const clearRowSelection = () => {
-    setRowSelection({})
-  }
+  const clearRowSelection = () => setRowSelection({})
 
   const selectedData = Object.keys(rowSelection)
     .map((key) => data[parseInt(key, 10)]);
@@ -57,6 +57,7 @@ export function DataTable<TData, TValue>({
             selectedCollection={selectedCollection}
             onFetchRecords={onFetchRecords}
             onClearRowSelection={clearRowSelection}
+            onGetCollectionFields={onGetCollectionFields}
           />
       </div>
       <Table>
