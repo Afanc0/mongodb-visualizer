@@ -17,6 +17,8 @@ use mongodb::options::WriteModel;
 
 static CLIENT: Lazy<OnceCell<Client>> = Lazy::new(OnceCell::new);
 
+use std::time::Duration;
+
 #[derive(Serialize)] 
 pub struct DatabaseInfo {
     pub name: String,
@@ -24,26 +26,36 @@ pub struct DatabaseInfo {
 }
 
 #[allow(dead_code)]
-pub async fn init_client() -> Result<()> {
+pub async fn init_client() -> bool {
     let uri = "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.0.2";
 
-    let mut client_options = ClientOptions::parse(uri).await?;
-    let server_api = ServerApi::builder().version(ServerApiVersion::V1).build();
-    client_options.server_api = Some(server_api);
-    let client = Client::with_options(client_options)?;
+    let client_options = match ClientOptions::parse(uri).await {
+        Ok(mut opts) => {
+            opts.server_selection_timeout = Some(Duration::from_secs(2));
+            opts.server_api = Some(ServerApi::builder().version(ServerApiVersion::V1).build());
+            opts
+        }
+        Err(_) => return false,
+    };
+
+    let client = match Client::with_options(client_options) {
+        Ok(c) => c,
+        Err(_) => return false,
+    };
 
     match client.database("admin").run_command(doc! { "ping": 1 }).await {
         Ok(_) => {
             println!("MongoDB connected.");
-            CLIENT.set(client).unwrap_or_else(|_| panic!("Client already initialized"));
+
+            // Set once, ignore if already initialized
+            let _ = CLIENT.set(client);
+            true
         }
-        Err(e) => {
+        Err(_) => {
             eprintln!("Mongod.service is not running.");
-            return Err(e);
+            false
         }
     }
-    
-    Ok(())
 }
 
 #[allow(dead_code)]

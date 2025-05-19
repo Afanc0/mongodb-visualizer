@@ -147,16 +147,21 @@ async fn get_collection_fields(db_name: String, coll_name: String) -> Result<Vec
         .map_err(|e| e.to_string())
 }
 
+#[tauri::command]
+async fn connect_mongo_service() -> bool {
+    db_client::init_client().await
+}
+
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .setup(|_app| {
             tauri::async_runtime::spawn(async {
-                if let Err(e) = db_client::init_client().await {
-                    eprintln!("MongoDB connection failed at startup: {}", e);
-                } else {
+                if db_client::init_client().await {
                     println!("Successfully connected to MongoDB at startup!");
+                } else {
+                    eprintln!("MongoDB connection failed at startup");
                 }
             });
             Ok(())
@@ -171,7 +176,8 @@ pub fn run() {
             get_collections,
             get_collection_fields,
             bulk_delete,
-            update_one
+            update_one,
+            connect_mongo_service
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

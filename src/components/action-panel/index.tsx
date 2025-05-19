@@ -21,24 +21,32 @@ export const ActionPanel = ({
     onGetCollectionFields
 }: ActionPanelProps) => {
     return (
-        <div className="flex flex-col h-screen">
-            <div className="flex-1 border-b overflow-auto">
-                <DataTablePanel 
-                    fieldList={fieldList}
-                    records={records}
-                    selectedCollection={selectedCollection}
-                    onFetchRecords={fetchRecords}
-                    onGetCollectionFields={onGetCollectionFields}
-                />
-            </div>
-            <div className="flex-1 overflow-auto">
-                <CreateRecordPanel 
-                    fieldList={fieldList}
-                    selectedCollection={selectedCollection}
-                    onFetchRecords={fetchRecords}
-                    onGetCollectionFields={onGetCollectionFields}
-                />
-            </div>
-        </div>
+        <>
+            {selectedCollection.db !== "" && selectedCollection.coll !== "" ? (
+                <div className="flex flex-col h-screen">
+                    <div className="flex-1 border-b overflow-auto">
+                        <DataTablePanel 
+                            fieldList={fieldList}
+                            records={records}
+                            selectedCollection={selectedCollection}
+                            onFetchRecords={fetchRecords}
+                            onGetCollectionFields={onGetCollectionFields}
+                        />
+                    </div>
+                    <div className="flex-1 overflow-auto">
+                        <CreateRecordPanel 
+                            fieldList={fieldList}
+                            selectedCollection={selectedCollection}
+                            onFetchRecords={fetchRecords}
+                            onGetCollectionFields={onGetCollectionFields}
+                        />
+                    </div>
+                </div>
+            ) : (
+                <div className="w-full h-screen flex items-center justify-center">
+                    <span>Select a database and collection to get started!</span>
+                </div>
+            )}
+        </>
     )
 }

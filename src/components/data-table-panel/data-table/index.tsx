@@ -16,6 +16,7 @@ import {
 import React from "react"
 import { ToolBarHeader } from "../../tool-bar-header"
 import { Collection } from "/@/types/databases-info"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "../../ui/breadcrumb"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -59,6 +60,19 @@ export function DataTable<TData, TValue>({
             onClearRowSelection={clearRowSelection}
             onGetCollectionFields={onGetCollectionFields}
           />
+      </div>
+      <div className="px-2 py-3 border-b">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink>{selectedCollection.db}</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink>{selectedCollection.coll}</BreadcrumbLink>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
       </div>
       <Table>
         <TableHeader>

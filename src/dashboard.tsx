@@ -9,11 +9,17 @@ import { Collection } from "./types/databases-info"
 import { Toaster } from "./components/ui/sonner"
 
 import { Record } from "./types/record"
+import { ServiceDisconnected } from "./components/service-disconnected"
+import { useMongoConnection } from "./hooks/use-mongo-connection"
+import { toast } from "sonner"
 
 function Dashboard() {
     const [databases, setDatabases] = useState<DatabaseInfo[]>([])
     const [fields, setFields] = useState<string[]>([])
     const [records, setRecords] = useState<Record[]>([])
+    // const [isServiceRunning, setIsServiceRunning] = useState<boolean>(false)
+
+    const [isServiceRunning, setIsServiceRunning]= useMongoConnection()
 
     const [selectedCollection, setSelectedCollection] = useState<Collection>({ db: "", coll: "" })
 
@@ -33,10 +39,23 @@ function Dashboard() {
         setSelectedCollection({ db: dbName, coll: collName } as Collection)
     }
 
+    const handleServiceConnection = async () => {
+        setIsServiceRunning(await invoke("connect_mongo_service"))
+        if (!isServiceRunning) {
+            toast("Service is not currently running.", {
+                description: "Please ensure MongoDB is running and try again.",
+            })
+        }
+    }
+
     useEffect(() => {
-        const getMongoDatabases = async () => setDatabases(await invoke("list_databases"))
-        getMongoDatabases()
-    }, [])
+        if (isServiceRunning) {
+            const getMongoDatabases = async () => setDatabases(await invoke("list_databases"))
+            getMongoDatabases()
+        } else {
+            setDatabases([])
+        }
+    }, [isServiceRunning])
     
     return (
         <>
@@ -50,15 +69,24 @@ function Dashboard() {
                             onFetchRecords={handleFetchRecords}
                         />
                     </section>
-                    <section className="flex-1 overflow-hidden">
-                        <ActionPanel 
-                            fieldList={fields} 
-                            records={records}
-                            selectedCollection={selectedCollection}
-                            onFetchRecords={handleFetchRecords}
-                            onGetCollectionFields={getCollectionFields}
-                        />
-                    </section>
+                    {isServiceRunning ? (
+                        <section className="flex-1 overflow-hidden">
+                            <ActionPanel 
+                                fieldList={fields} 
+                                records={records}
+                                selectedCollection={selectedCollection}
+                                onFetchRecords={handleFetchRecords}
+                                onGetCollectionFields={getCollectionFields}
+                            />
+                        </section>
+                    ) : (
+                        <div className="w-full h-screen flex items-center justify-center px-4">
+                            <ServiceDisconnected serviceName="MongoDB" onConnection={handleServiceConnection}>
+                                <span>This service needs to be connected before you can use all features.</span> <br />
+                                <span>Make sure to start your local server.</span>
+                            </ServiceDisconnected>
+                        </div>
+                    )}
                 </div>
             </main>
             <Toaster />

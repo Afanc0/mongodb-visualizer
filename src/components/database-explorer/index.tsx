@@ -27,7 +27,7 @@ export const DatabaseExplorer = ({
 }: DatabaseExplorerProps) => {
     return (
         <SidebarProvider>
-            <Sidebar className="w-auto">
+            <Sidebar className="w-auto min-w-3xs relative">
                 <SidebarContent>
                     <SidebarGroup>
                         <SidebarGroupLabel>Mongo Databases</SidebarGroupLabel>

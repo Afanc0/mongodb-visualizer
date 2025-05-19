@@ -48,8 +48,8 @@ export const ToolBarHeader = ({
     }
 
     return (
-        <div className="p-3 flex justify-between">
-            <div className="flex-1 px-3">
+        <div className="py-3 px-2 flex justify-between">
+            <div className="flex-1">
                 <form onSubmit={handleFilter}>
                     <Input type="text" placeholder="e.g., name='Car'; model='Toyota'"  onChange={e => setFilter(e.target.value)}/>
                 </form>
