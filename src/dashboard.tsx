@@ -17,7 +17,6 @@ function Dashboard() {
     const [databases, setDatabases] = useState<DatabaseInfo[]>([])
     const [fields, setFields] = useState<string[]>([])
     const [records, setRecords] = useState<Record[]>([])
-    // const [isServiceRunning, setIsServiceRunning] = useState<boolean>(false)
 
     const [isServiceRunning, setIsServiceRunning]= useMongoConnection()
 
@@ -82,8 +81,7 @@ function Dashboard() {
                     ) : (
                         <div className="w-full h-screen flex items-center justify-center px-4">
                             <ServiceDisconnected serviceName="MongoDB" onConnection={handleServiceConnection}>
-                                <span>This service needs to be connected before you can use all features.</span> <br />
-                                <span>Make sure to start your local server.</span>
+                                <span>Make sure to start your local Mongo server and then link account.</span>
                             </ServiceDisconnected>
                         </div>
                     )}

@@ -15,9 +15,13 @@ use serde::Serialize;
 
 use mongodb::options::WriteModel;
 
+use std::time::Duration;
+
+use std::sync::Mutex;
+
 static CLIENT: Lazy<OnceCell<Client>> = Lazy::new(OnceCell::new);
 
-use std::time::Duration;
+static URI: Lazy<Mutex<String>> = Lazy::new(|| Mutex::new(String::new()));
 
 #[derive(Serialize)] 
 pub struct DatabaseInfo {
@@ -25,11 +29,20 @@ pub struct DatabaseInfo {
     pub size_on_disk: u64,
 }
 
+pub fn set_connection_string(connection_string: &str) {
+    let mut uri = URI.lock().unwrap();
+    *uri = connection_string.to_string();
+}
+
+fn get_connection_string() -> String {
+    URI.lock().unwrap().clone()
+}
+
 #[allow(dead_code)]
 pub async fn init_client() -> bool {
-    let uri = "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.0.2";
+    let uri = get_connection_string();
 
-    let client_options = match ClientOptions::parse(uri).await {
+    let client_options = match ClientOptions::parse(&uri).await {
         Ok(mut opts) => {
             opts.server_selection_timeout = Some(Duration::from_secs(2));
             opts.server_api = Some(ServerApi::builder().version(ServerApiVersion::V1).build());

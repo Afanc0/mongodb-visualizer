@@ -152,6 +152,10 @@ async fn connect_mongo_service() -> bool {
     db_client::init_client().await
 }
 
+#[tauri::command]
+async fn set_connection_string(connection_string: String) {
+    db_client::set_connection_string(&connection_string);
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -177,7 +181,8 @@ pub fn run() {
             get_collection_fields,
             bulk_delete,
             update_one,
-            connect_mongo_service
+            connect_mongo_service,
+            set_connection_string
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
