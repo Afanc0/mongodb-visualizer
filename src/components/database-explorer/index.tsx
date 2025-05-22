@@ -93,60 +93,59 @@ export const DatabaseExplorer = ({
                                         onFetchRecords={onFetchRecords}
                                     />
                                 ))}
-                                <SidebarMenuItem>
-                                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                                        <DialogTrigger asChild>
-                                            <SidebarMenuSubButton className="flex justify-center">
-                                                <Plus className="h-4 w-4 mr-2" />
-                                            </SidebarMenuSubButton>
-                                        </DialogTrigger>
-                                        <DialogContent>
-                                            <DialogHeader>
-                                                <DialogTitle>Create Database</DialogTitle>
-                                                <DialogDescription>Define a database and collection to add to your service.</DialogDescription>
-                                            </DialogHeader>
-                                            <div className="grid gap-4 py-4">
-                                                <div className="grid grid-cols-4 items-center gap-4">
-                                                    <Label htmlFor="fieldDb" className="text-right">
-                                                        Database
-                                                    </Label>
-                                                    <Input
-                                                        id="fieldDb"
-                                                        name="database"
-                                                        value={databaseName}
-                                                        onChange={e => setDatabaseName(e.target.value)}
-                                                        placeholder="e.g. database name"
-                                                        className="col-span-3"
-                                                    />
+                                {itemList.length > 0 && (
+                                    <SidebarMenuItem>
+                                        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                                            <DialogTrigger asChild>
+                                                <SidebarMenuSubButton className="flex justify-center">
+                                                    <Plus className="h-4 w-4 mr-2" />
+                                                </SidebarMenuSubButton>
+                                            </DialogTrigger>
+                                            <DialogContent>
+                                                <DialogHeader>
+                                                    <DialogTitle>Create Database</DialogTitle>
+                                                    <DialogDescription>Define a database and collection to add to your service.</DialogDescription>
+                                                </DialogHeader>
+                                                <div className="grid gap-4 py-4">
+                                                    <div className="grid grid-cols-4 items-center gap-4">
+                                                        <Label htmlFor="fieldDb" className="text-right">
+                                                            Database
+                                                        </Label>
+                                                        <Input
+                                                            id="fieldDb"
+                                                            name="database"
+                                                            value={databaseName}
+                                                            onChange={e => setDatabaseName(e.target.value)}
+                                                            placeholder="e.g. database name"
+                                                            className="col-span-3"
+                                                        />
+                                                    </div>
+                                                    <div className="grid grid-cols-4 items-center gap-4">
+                                                        <Label htmlFor="fieldColl" className="text-right">
+                                                            Collection
+                                                        </Label>
+                                                        <Input
+                                                            id="fieldColl"
+                                                            name="collection"
+                                                            value={collectionName}
+                                                            onChange={e => setCollectionName(e.target.value)}
+                                                            placeholder="e.g. collection name"
+                                                            className="col-span-3"
+                                                        />
+                                                    </div>
                                                 </div>
-                                                <div className="grid grid-cols-4 items-center gap-4">
-                                                    <Label htmlFor="fieldColl" className="text-right">
-                                                        Collection
-                                                    </Label>
-                                                    <Input
-                                                        id="fieldColl"
-                                                        name="collection"
-                                                        value={collectionName}
-                                                        onChange={e => setCollectionName(e.target.value)}
-                                                        placeholder="e.g. collection name"
-                                                        className="col-span-3"
-                                                    />
-                                                </div>
-                                            </div>
-                                            <DialogFooter>
-                                                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                                                    Cancel
-                                                </Button>
-                                                <Button type="button" onClick={createDatabasse}>
-                                                    Create
-                                                </Button>
-                                            </DialogFooter>
-                                        </DialogContent>
-                                    </Dialog>
-                                    {/* <SidebarMenuButton className="flex justify-center">
-                                        <Plus className="h-4 w-4 mr-2" />
-                                    </SidebarMenuButton> */}
-                                </SidebarMenuItem>
+                                                <DialogFooter>
+                                                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                                                        Cancel
+                                                    </Button>
+                                                    <Button type="button" onClick={createDatabasse}>
+                                                        Create
+                                                    </Button>
+                                                </DialogFooter>
+                                            </DialogContent>
+                                        </Dialog>
+                                    </SidebarMenuItem>
+                                )}
                             </SidebarMenu>
                         </SidebarGroupContent>
                     </SidebarGroup>
