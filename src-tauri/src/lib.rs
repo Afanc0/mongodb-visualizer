@@ -157,6 +157,21 @@ async fn set_connection_string(connection_string: String) {
     db_client::set_connection_string(&connection_string);
 }
 
+#[tauri::command]
+async fn create_collection(db_name: String, coll_name: String) {
+    db_client::create_collection(&db_name, &coll_name).await;
+}
+
+#[tauri::command]
+async fn drop_collection(db_name: String, coll_name: String) {
+    db_client::drop_collection(&db_name, &coll_name).await;
+}
+
+#[tauri::command]
+async fn drop_database(db_name: String) {
+    db_client::drop_database(&db_name).await;
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -182,7 +197,10 @@ pub fn run() {
             bulk_delete,
             update_one,
             connect_mongo_service,
-            set_connection_string
+            set_connection_string,
+            create_collection,
+            drop_collection,
+            drop_database
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -47,9 +47,10 @@ function Dashboard() {
         }
     }
 
+    const getMongoDatabases = async () => setDatabases(await invoke("list_databases"))
+
     useEffect(() => {
         if (isServiceRunning) {
-            const getMongoDatabases = async () => setDatabases(await invoke("list_databases"))
             getMongoDatabases()
         } else {
             setDatabases([])
@@ -66,6 +67,7 @@ function Dashboard() {
                             onGetCollectionFields={getCollectionFields}
                             onHandleSelectedCollection={handleSelectedCollection}
                             onFetchRecords={handleFetchRecords}
+                            onGetDatabase={getMongoDatabases}
                         />
                     </section>
                     {isServiceRunning ? (

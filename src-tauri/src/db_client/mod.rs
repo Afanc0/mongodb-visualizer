@@ -192,3 +192,27 @@ pub fn get_namespace(db_name: &str, coll_name: &str) -> Result<Collection<Docume
 
     Ok(namespace)
 }
+
+#[allow(dead_code)] 
+pub async fn create_collection(db_name: &str, coll_name: &str) -> mongodb::error::Result<()> {
+    let client = CLIENT.get().expect("MongoDB client not initialized");
+    let db = client.database(db_name);
+    db.create_collection(coll_name).await?;
+    Ok(())
+}
+
+#[allow(dead_code)]
+pub async fn drop_collection(db_name: &str, coll_name: &str) -> mongodb::error::Result<()> {
+    let client = CLIENT.get().expect("MongoDB client not initialized");
+    let db = client.database(db_name);
+    db.collection::<Document>(coll_name).drop().await?;
+    Ok(())
+}
+
+#[allow(dead_code)]
+pub async fn drop_database(db_name: &str) -> mongodb::error::Result<()> {
+    let client: &Client = CLIENT.get().expect("MongoDB client not initialized");
+    let db = client.database(db_name);
+    db.drop().await?;
+    Ok(())
+}
